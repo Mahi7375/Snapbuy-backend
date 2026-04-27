@@ -31,7 +31,7 @@ const Home = ({ selectedCategory }) => {
   }, [showToast]);
 
   // Function to convert base64 string to data URL
-  const convertBase64ToDataURL = (base64String, mimeType = 'image/jpeg') => {
+  const convertBase64ToDataURL = (base64String, imageType = null) => {
     if (!base64String) return unplugged; // Return fallback image if no data
     
     // If it's already a data URL, return as is
@@ -42,6 +42,25 @@ const Home = ({ selectedCategory }) => {
     // If it's already a URL, return as is
     if (base64String.startsWith('http')) {
       return base64String;
+    }
+    
+    // Determine the correct MIME type
+    let mimeType = 'image/jpeg'; // Default fallback
+    
+    // If imageType is provided, use it (but validate it's a valid image type)
+    if (imageType) {
+      const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+      if (validImageTypes.includes(imageType)) {
+        mimeType = imageType;
+      } else if (imageType.startsWith('image/')) {
+        // Accept any image/ type even if not in our list
+        mimeType = imageType;
+      } else {
+        // If imageType is not an image type, try to detect from base64 data
+        if (base64String.startsWith('UklGR')) {
+          mimeType = 'image/webp'; // WebP files start with "RIFF" in base64
+        }
+      }
     }
     
     // Convert base64 string to data URL
@@ -93,7 +112,7 @@ const Home = ({ selectedCategory }) => {
             {toastProduct && (
               <div className="d-flex align-items-center">
                 <img 
-                  src={convertBase64ToDataURL(toastProduct.imageData)} 
+                  src={convertBase64ToDataURL(toastProduct.imageData, toastProduct.imageType)} 
                   alt={toastProduct.name} 
                   className="me-2 rounded" 
                   width="40" 
@@ -120,14 +139,14 @@ const Home = ({ selectedCategory }) => {
             </div>
           ) : (
             filteredProducts.map((product) => {
-              const { id, brand, name, price, productAvailable, imageData, stockQuantity } = product;
+              const { id, brand, name, price, productAvailable, imageData, imageType, stockQuantity } = product;
               
               return (
                 <div className="col" key={id}>
                   <div className={`card h-100 shadow-sm ${!productAvailable ? 'bg-light' : ''}`}>
                     <Link to={`/product/${id}`} className="text-decoration-none text-dark">
                       <img
-                        src={convertBase64ToDataURL(imageData)} 
+                        src={convertBase64ToDataURL(imageData, imageType)} 
                         alt={name}
                         className="card-img-top p-2"
                         style={{ height: "150px", objectFit: "cover" }}
