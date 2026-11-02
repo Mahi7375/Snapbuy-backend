@@ -11,6 +11,7 @@ import com.telusko.SpringEcom.repo.OrderRepo;
 import com.telusko.SpringEcom.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -87,7 +88,7 @@ public class OrderService {
         return orderResponse;
     }
 
-
+    @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrderResponses() {
 
      List<Order> orders = orderRepo.findAll();
